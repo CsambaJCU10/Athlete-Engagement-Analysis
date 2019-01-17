@@ -1,0 +1,95 @@
+---
+title: "USOC Project"
+author: "Choe"
+date: "January 12, 2019"
+output:
+  html_document:
+    df_print: paged
+---
+
+```{r}
+library(dplyr)
+library(gam)
+library(readr)
+library(pROC)
+library(corrplot)
+MockW <- read_csv("MockWellness.csv")
+summary(MockW)
+```
+
+
+```{r}
+#Removed Column lines that arent necessary
+MockW$X3 <- NULL
+MockW$X14 <- NULL
+MockW$X15 <- NULL
+MockW$X16 <- NULL
+MockW$X17 <- NULL
+
+#Make the load column a factor data type
+MockW$Date = as.factor(MockW$Date)
+MockW$Athlete = as.factor(MockW$Athlete)
+MockW$Team = as.factor(MockW$Team)
+MockW$Weekday = as.factor(MockW$Weekday)
+MockW$Load = as.factor(MockW$Load)
+summary(MockW)
+
+```
+
+
+```{r}
+model <- lm(formula = 'Sleep Hours' ~ Mood, data=MockW)
+summary(model)
+anova(model)
+
+```
+
+```{r}
+predict_model <- predict(model, newdata=MockW, type = 'response')
+
+probability <- as.numeric(predict_model>.55)
+
+levels(predict_model) <- list(NO='FALSE',YES='TRUE')
+table(Predicted=probability, True=MockW$Load)
+
+roc(MockW$Load,predict_model) 
+plot(roc(MockW$Load,predict_model),col='green',lwd=2)
+```
+
+
+```{r}
+MockL<- read_csv("MockLoadE.csv")
+
+```
+
+```{r}
+
+#Make the load column a factor data type
+MockL$Date = as.factor(MockL$Date)
+MockL$Athlete = as.factor(MockL$Athlete)
+MockL$Team = as.factor(MockL$Team)
+MockL$Weekday = as.factor(MockL$Weekday)
+MockL$'Injury/Illness Status'= as.factor(MockL$'Injury/Illness Status')
+MockL$'Injury First Time Report' = as.factor(MockL$'Injury First Time Report')
+MockL$'Injury Type' = as.factor(MockL$'Injury Type')
+MockL$'Training/NoTraining' = as.factor(MockL$'Training/NoTraining')
+MockL$'Training Location' = as.factor(MockL$'Training Location')
+MockL$'Travel/No Travel' = as.factor(MockL$'Travel/No Travel')
+MockL$'Recovery Modality' = as.factor(MockL$'Recovery Modality')
+MockL$FUsurvey = as.factor(MockL$FUsurvey)
+summary(MockL)
+```
+
+```{r}
+model2 <- glm(formula = FUsurvey ~ ., family="binomial", data= MockL)
+summary(model2)
+
+```
+
+
+```{r}
+anova(model2)
+```
+
+
+
